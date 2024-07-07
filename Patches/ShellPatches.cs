@@ -1,5 +1,5 @@
-using Aki.Reflection.Patching;
 using System.Reflection;
+using SPT.Reflection.Patching;
 using TYR_DeClutterer.Utils;
 
 namespace TYR_DeClutterer.Patches
@@ -10,7 +10,7 @@ namespace TYR_DeClutterer.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass1668).GetMethod("method_9", BindingFlags.Instance | BindingFlags.Public);
+            return typeof(WeaponManagerClass).GetMethod("method_9", BindingFlags.Instance | BindingFlags.Public);
         }
 
         [PatchPrefix]
@@ -29,7 +29,7 @@ namespace TYR_DeClutterer.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass1668).GetMethod("SpawnShellAfterJam", BindingFlags.Instance | BindingFlags.Public);
+            return typeof(WeaponManagerClass).GetMethod("SpawnShellAfterJam", BindingFlags.Instance | BindingFlags.Public);
         }
 
         [PatchPrefix]
@@ -46,7 +46,7 @@ namespace TYR_DeClutterer.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass1668).GetMethod("method_4", BindingFlags.Instance | BindingFlags.Public);
+            return typeof(WeaponManagerClass).GetMethod("method_4", BindingFlags.Instance | BindingFlags.Public);
         }
 
         [PatchPrefix]

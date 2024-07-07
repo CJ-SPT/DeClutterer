@@ -1,8 +1,8 @@
-﻿using Aki.Reflection.Patching;
-using EFT;
+﻿using EFT;
 using EFT.Interactive;
 using HarmonyLib;
 using System.Reflection;
+using SPT.Reflection.Patching;
 using TYR_DeClutterer.Utils;
 
 namespace TYR_DeClutterer.Patches
@@ -13,7 +13,7 @@ namespace TYR_DeClutterer.Patches
 
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass649), "Update");
+            return AccessTools.Method(typeof(EFTPhysicsClass), nameof(EFTPhysicsClass.Update));
         }
 
         [PatchPrefix]
@@ -25,8 +25,8 @@ namespace TYR_DeClutterer.Patches
             everyOtherFixedUpdate = !everyOtherFixedUpdate;
             if (everyOtherFixedUpdate)
             {
-                GClass649.GClass650.Update();
-                GClass649.GClass651.Update();
+                EFTPhysicsClass.GClass650.Update();
+                EFTPhysicsClass.GClass651.Update();
             }
             return false;
         }
@@ -38,7 +38,7 @@ namespace TYR_DeClutterer.Patches
 
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass649), "FixedUpdate");
+            return AccessTools.Method(typeof(EFTPhysicsClass), nameof(EFTPhysicsClass.FixedUpdate));
         }
 
         [PatchPrefix]
@@ -50,7 +50,7 @@ namespace TYR_DeClutterer.Patches
             everyOtherFixedUpdate = !everyOtherFixedUpdate;
             if (everyOtherFixedUpdate)
             {
-                GClass649.GClass650.FixedUpdate();
+                EFTPhysicsClass.GClass650.FixedUpdate();
             }
             return false;
         }
@@ -74,7 +74,7 @@ namespace TYR_DeClutterer.Patches
             everyOtherFixedUpdate = !everyOtherFixedUpdate;
             if (everyOtherFixedUpdate)
             {
-                GClass649.SyncTransforms();
+                EFTPhysicsClass.SyncTransforms();
             }
             return false;
         }

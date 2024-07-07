@@ -19,7 +19,7 @@ using UnityEngine.SceneManagement;
 
 namespace TYR_DeClutterer
 {
-    [BepInPlugin("com.TYR.DeClutter", "TYR_DeClutter", "1.2.2")]
+    [BepInPlugin("com.TYR.DeClutter", "TYR_DeClutter", "1.2.3")]
     public class DeClutter : BaseUnityPlugin
     {
         private static string PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
