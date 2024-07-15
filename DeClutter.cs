@@ -19,7 +19,7 @@ using UnityEngine.SceneManagement;
 
 namespace TYR_DeClutterer
 {
-    [BepInPlugin("com.TYR.DeClutter", "TYR_DeClutter", "1.2.3")]
+    [BepInPlugin("com.TYR.DeClutter", "TYR_DeClutter", "1.2.4")]
     public class DeClutter : BaseUnityPlugin
     {
         private static string PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -75,11 +75,7 @@ namespace TYR_DeClutterer
             new PhysicsUpdatePatch().Enable();
             new PhysicsFixedUpdatePatch().Enable();
             new RagdollPhysicsLateUpdatePatch().Enable();
-
-            new AmbientLightOptimizeRenderingPatch().Enable();
-            new AmbientLightDisableUpdatesPatch().Enable();
-            new AmbientLightDisableLateUpdatesPatch().Enable();
-
+            
             new DontSpawnShellsFiringPatch().Enable();
             new DontSpawnShellsJamPatch().Enable();
             new DontSpawnShellsAtAllReallyPatch().Enable();
@@ -192,7 +188,6 @@ namespace TYR_DeClutterer
             Configuration.framesaverParticlesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
             Configuration.framesaverSoftVegetationEnabledConfig.SettingChanged += OnApplyVisualsChanged;
             Configuration.framesaverReflectionsEnabledConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverLightingShadowsEnabledConfig.SettingChanged += OnApplyVisualsChanged;
             Configuration.framesaverWeatherUpdatesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
             Configuration.framesaverTexturesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
             Configuration.framesaverLODEnabledConfig.SettingChanged += OnApplyVisualsChanged;

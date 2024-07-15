@@ -20,7 +20,6 @@ namespace TYR_DeClutterer.Utils
         public static ConfigEntry<bool> framesaverShellChangesEnabledConfig;
         public static ConfigEntry<bool> framesaverSoftVegetationEnabledConfig;
         public static ConfigEntry<bool> framesaverReflectionsEnabledConfig;
-        public static ConfigEntry<bool> framesaverLightingShadowsEnabledConfig;
         public static ConfigEntry<bool> framesaverLightingShadowCascadesEnabledConfig;
         public static ConfigEntry<bool> framesaverWeatherUpdatesEnabledConfig;
         public static ConfigEntry<bool> framesaverTexturesEnabledConfig;
@@ -133,34 +132,28 @@ namespace TYR_DeClutterer.Utils
                 "G - Reflection Changes",
                 false,
                 "Enables reflection changes.");
-
-            framesaverLightingShadowsEnabledConfig = Config.Bind(
-                "C - Framesaver Enabler",
-                "H - Lighting & Shadow Changes",
-                false,
-                "Enables lighting & shadow changes.");
-
+            
             framesaverLightingShadowCascadesEnabledConfig = Config.Bind(
                 "C - Framesaver Enabler",
-                "I - Shadow Cascade Changes",
+                "H - Shadow Cascade Changes",
                 false,
                 "Enables shadow cascade changes.");
 
             framesaverWeatherUpdatesEnabledConfig = Config.Bind(
                 "C - Framesaver Enabler",
-                "J - Cloud & Weather Changes",
+                "I - Cloud & Weather Changes",
                 false,
                 "Enables Cloud Shadow & Weather changes.");
 
             framesaverTexturesEnabledConfig = Config.Bind(
                 "C - Framesaver Enabler",
-                "K - Texture Changes",
+                "J - Texture Changes",
                 false,
                 "Enables texture changes.");
 
             framesaverLODEnabledConfig = Config.Bind(
                 "C - Framesaver Enabler",
-                "L - LOD Changes",
+                "K - LOD Changes",
                 false,
                 "Enables LOD changes.");
 

@@ -6,57 +6,6 @@ using TYR_DeClutterer.Utils;
 
 namespace TYR_DeClutterer.Patches
 {
-    internal class AmbientLightOptimizeRenderingPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(AmbientLight).GetMethod("method_8", BindingFlags.Instance | BindingFlags.Public);
-        }
-
-        [PatchPrefix]
-        public static bool Prefix()
-        {
-            if (!Configuration.framesaverLightingShadowsEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
-                return true;
-
-            return false;
-        }
-    }
-
-    internal class AmbientLightDisableUpdatesPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(AmbientLight).GetMethod("Update", BindingFlags.Instance | BindingFlags.Public);
-        }
-
-        [PatchPrefix]
-        public static bool Prefix()
-        {
-            if (!Configuration.framesaverLightingShadowsEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
-                return true;
-
-            return false;
-        }
-    }
-
-    internal class AmbientLightDisableLateUpdatesPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(AmbientLight).GetMethod("LateUpdate", BindingFlags.Instance | BindingFlags.Public);
-        }
-
-        [PatchPrefix]
-        public static bool Prefix()
-        {
-            if (!Configuration.framesaverLightingShadowsEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
-                return true;
-
-            return false;
-        }
-    }
-
     internal class CloudsControllerDelayUpdatesPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
