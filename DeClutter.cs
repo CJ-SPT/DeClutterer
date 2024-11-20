@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using DrakiaXYZ.VersionChecker;
 using TYR_DeClutterer.Patches;
 using TYR_DeClutterer.Utils;
 using UnityEngine;
@@ -19,31 +20,33 @@ using UnityEngine.SceneManagement;
 
 namespace TYR_DeClutterer
 {
-    [BepInPlugin("com.TYR.DeClutter", "TYR_DeClutter", "1.2.4")]
+    [BepInPlugin("com.TYR.DeClutter", "TYR_DeClutter", "1.2.5")]
+    [BepInDependency("com.SPT.custom", "3.10.0")]
     public class DeClutter : BaseUnityPlugin
     {
+        public const int TarkovVersion = 33420;
+        
         private static string PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        public static bool DefaultsoftParticles = false;
-        public static int DefaultparticleRaycastBudget = 0;
-        public static bool DefaultsoftVegetation = false;
-        public static bool DefaultrealtimeReflectionProbes = false;
-        public static int DefaultpixelLightCount = 0;
+        public static bool DefaultsoftParticles;
+        public static int DefaultparticleRaycastBudget;
+        public static bool DefaultsoftVegetation;
+        public static bool DefaultrealtimeReflectionProbes;
+        public static int DefaultpixelLightCount;
         public static ShadowQuality DefaultShadows;
-        public static int DefaultshadowCascades = 0;
-        public static int DefaultmasterTextureLimit = 0;
-        public static float DefaultlodBias = 0f;
+        public static int DefaultshadowCascades;
+        public static int DefaultmasterTextureLimit;
+        public static float DefaultlodBias;
 
         private static GameWorld _gameWorld;
-        private List<GameObject> _allGameObjectsList = new List<GameObject>();
-        private static List<GameObject> _savedClutterObjects = new List<GameObject>();
-        private static ClutterNameStruct _cleanUpNames = new ClutterNameStruct();
-        private static bool _deCluttered = false;
-        private static bool _applyDeclutter = false;
+        private List<GameObject> _allGameObjectsList = [];
+        private static List<GameObject> _savedClutterObjects = [];
+        private static ClutterNameStruct _cleanUpNames;
+        private static bool _deCluttered;
 
         private static bool MapLoaded() => Singleton<GameWorld>.Instantiated;
 
-        private Dictionary<string, bool> _dontDisableDictionary = new Dictionary<string, bool>
+        private Dictionary<string, bool> _dontDisableDictionary = new()
         {
             { "item_", true },
             { "weapon_", true },
@@ -66,12 +69,17 @@ namespace TYR_DeClutterer
             { "mine", true }
         };
 
-        private Dictionary<string, bool> _clutterNameDictionary = new Dictionary<string, bool>
-        {
-        };
+        private Dictionary<string, bool> _clutterNameDictionary = [];
 
         private void Awake()
         {
+            if (!VersionChecker.CheckEftVersion(Logger, Info, Config))
+            {
+                throw new Exception("Invalid EFT Version");
+            }
+            
+            Configuration.Bind(Config);
+            
             new PhysicsUpdatePatch().Enable();
             new PhysicsFixedUpdatePatch().Enable();
             new RagdollPhysicsLateUpdatePatch().Enable();
@@ -82,21 +90,17 @@ namespace TYR_DeClutterer
 
             new SkyDelayUpdatesPatch().Enable();
             new WeatherLateUpdatePatch().Enable();
-            new CloudsControllerDelayUpdatesPatch().Enable();
             new WeatherEventControllerDelayUpdatesPatch().Enable();
         }
 
         private void Start()
         {
             SceneManager.sceneUnloaded += OnSceneUnloaded;
-
-            Configuration.Bind(Config);
+            
             SubscribeConfig();
 
             Initialize_clutterNameDictionary();
-
-            _applyDeclutter = Configuration.declutterEnabledConfig.Value;
-
+            
             DefaultsoftParticles = QualitySettings.softParticles;
             DefaultparticleRaycastBudget = QualitySettings.particleRaycastBudget;
             DefaultsoftVegetation = QualitySettings.softVegetation;
@@ -110,13 +114,13 @@ namespace TYR_DeClutterer
 
         private void Update()
         {
-            if (!MapLoaded() || _deCluttered || !Configuration.declutterEnabledConfig.Value)
+            if (!MapLoaded() || _deCluttered || !Configuration.DeclutterEnabledConfig.Value)
                 return;
 
             _gameWorld = Singleton<GameWorld>.Instance;
-            if (_gameWorld == null || _gameWorld.MainPlayer == null || IsInHideout())
-                return;
-
+            
+            if (_gameWorld is null || IsInHideout()) return;
+            
             _deCluttered = true;
 
             DeClutterScene();
@@ -135,37 +139,37 @@ namespace TYR_DeClutterer
         {
             _clutterNameDictionary.Clear();
 
-            _clutterNameDictionary = Configuration.declutterGarbageEnabledConfig.Value
+            _clutterNameDictionary = Configuration.DeclutterGarbageEnabledConfig.Value
                 ? _clutterNameDictionary.Concat(_cleanUpNames.Garbage)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
                 : _clutterNameDictionary;
 
-            _clutterNameDictionary = Configuration.declutterHeapsEnabledConfig.Value
+            _clutterNameDictionary = Configuration.DeclutterHeapsEnabledConfig.Value
                 ? _clutterNameDictionary.Concat(_cleanUpNames.Heaps)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
                 : _clutterNameDictionary;
 
-            _clutterNameDictionary = Configuration.declutterSpentCartridgesEnabledConfig.Value
+            _clutterNameDictionary = Configuration.DeclutterSpentCartridgesEnabledConfig.Value
                 ? _clutterNameDictionary.Concat(_cleanUpNames.SpentCartridges)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
                 : _clutterNameDictionary;
 
-            _clutterNameDictionary = Configuration.declutterFakeFoodEnabledConfig.Value
+            _clutterNameDictionary = Configuration.DeclutterFakeFoodEnabledConfig.Value
                 ? _clutterNameDictionary.Concat(_cleanUpNames.FoodDrink)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
                 : _clutterNameDictionary;
 
-            _clutterNameDictionary = Configuration.declutterDecalsEnabledConfig.Value
+            _clutterNameDictionary = Configuration.DeclutterDecalsEnabledConfig.Value
                 ? _clutterNameDictionary.Concat(_cleanUpNames.Decals)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
                 : _clutterNameDictionary;
 
-            _clutterNameDictionary = Configuration.declutterPuddlesEnabledConfig.Value
+            _clutterNameDictionary = Configuration.DeclutterPuddlesEnabledConfig.Value
                 ? _clutterNameDictionary.Concat(_cleanUpNames.Puddles)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
                 : _clutterNameDictionary;
 
-            _clutterNameDictionary = Configuration.declutterShardsEnabledConfig.Value
+            _clutterNameDictionary = Configuration.DeclutterShardsEnabledConfig.Value
                 ? _clutterNameDictionary.Concat(_cleanUpNames.Shards)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
                 : _clutterNameDictionary;
@@ -173,30 +177,30 @@ namespace TYR_DeClutterer
 
         private void SubscribeConfig()
         {
-            Configuration.declutterEnabledConfig.SettingChanged += OnApplyDeclutterSettingChanged;
-            Configuration.declutterGarbageEnabledConfig.SettingChanged += BuildClutterNameDict;
-            Configuration.declutterHeapsEnabledConfig.SettingChanged += BuildClutterNameDict;
-            Configuration.declutterSpentCartridgesEnabledConfig.SettingChanged += BuildClutterNameDict;
-            Configuration.declutterFakeFoodEnabledConfig.SettingChanged += BuildClutterNameDict;
-            Configuration.declutterDecalsEnabledConfig.SettingChanged += BuildClutterNameDict;
-            Configuration.declutterPuddlesEnabledConfig.SettingChanged += BuildClutterNameDict;
-            Configuration.declutterShardsEnabledConfig.SettingChanged += BuildClutterNameDict;
+            Configuration.DeclutterEnabledConfig.SettingChanged += OnApplyDeclutterSettingChanged;
+            Configuration.DeclutterGarbageEnabledConfig.SettingChanged += BuildClutterNameDict;
+            Configuration.DeclutterHeapsEnabledConfig.SettingChanged += BuildClutterNameDict;
+            Configuration.DeclutterSpentCartridgesEnabledConfig.SettingChanged += BuildClutterNameDict;
+            Configuration.DeclutterFakeFoodEnabledConfig.SettingChanged += BuildClutterNameDict;
+            Configuration.DeclutterDecalsEnabledConfig.SettingChanged += BuildClutterNameDict;
+            Configuration.DeclutterPuddlesEnabledConfig.SettingChanged += BuildClutterNameDict;
+            Configuration.DeclutterShardsEnabledConfig.SettingChanged += BuildClutterNameDict;
 
-            Configuration.framesaverEnabledConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverPhysicsEnabledConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverShellChangesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverParticlesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverSoftVegetationEnabledConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverReflectionsEnabledConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverWeatherUpdatesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverTexturesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverLODEnabledConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverParticleBudgetDividerConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverPixelLightDividerConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverShadowDividerConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverTextureSizeConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverLODBiasConfig.SettingChanged += OnApplyVisualsChanged;
-            Configuration.framesaverFireAndSmokeEnabledConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverEnabledConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverPhysicsEnabledConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverShellChangesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverParticlesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverSoftVegetationEnabledConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverReflectionsEnabledConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverWeatherUpdatesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverTexturesEnabledConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverLODEnabledConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverParticleBudgetDividerConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverPixelLightDividerConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverShadowDividerConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverTextureSizeConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverLODBiasConfig.SettingChanged += OnApplyVisualsChanged;
+            Configuration.FramesaverFireAndSmokeEnabledConfig.SettingChanged += OnApplyVisualsChanged;
         }
 
         private void OnApplyVisualsChanged(object sender, EventArgs e)
@@ -206,7 +210,7 @@ namespace TYR_DeClutterer
 
         private void OnApplyVisualsChanged()
         {
-            if (Configuration.framesaverEnabledConfig.Value)
+            if (Configuration.FramesaverEnabledConfig.Value)
             {
                 GraphicsUtils.SetParticlesQuality();
 
@@ -228,23 +232,21 @@ namespace TYR_DeClutterer
 
         private void OnApplyDeclutterSettingChanged(object sender, EventArgs e)
         {
-            _applyDeclutter = Configuration.declutterEnabledConfig.Value;
-            if (_deCluttered)
+            if (!_deCluttered) return;
+            
+            if (Configuration.DeclutterEnabledConfig.Value)
             {
-                if (_applyDeclutter)
-                {
-                    DeClutterEnabled();
-                }
-                else
-                {
-                    ReClutterEnabled();
-                }
+                DeClutterEnabled();
+            }
+            else
+            {
+                ReClutterEnabled();
             }
         }
 
         private void DeClutterEnabled()
         {
-            foreach (GameObject obj in _savedClutterObjects)
+            foreach (var obj in _savedClutterObjects)
             {
                 if (obj.activeSelf == true)
                 {
@@ -255,7 +257,7 @@ namespace TYR_DeClutterer
 
         private void ReClutterEnabled()
         {
-            foreach (GameObject obj in _savedClutterObjects)
+            foreach (var obj in _savedClutterObjects)
             {
                 if (obj.activeSelf == false)
                 {
@@ -273,18 +275,9 @@ namespace TYR_DeClutterer
 
         private bool IsInHideout()
         {
-            // Check if "bunker_2" is one of the active scene names
-            for (int i = 0; i < SceneManager.sceneCount; i++)
-            {
-                Scene scene = SceneManager.GetSceneAt(i);
-                if (scene.name == "bunker_2")
-                {
-                    //EFT.UI.ConsoleScreen.LogError("bunker_2 loaded, not running de-cluttering.");
-                    return true;
-                }
-            }
-            //EFT.UI.ConsoleScreen.LogError("bunker_2 not loaded, de-cluttering.");
-            return false;
+            var gameWorld = Singleton<GameWorld>.Instance;
+            
+            return gameWorld is not null && gameWorld is HideoutGameWorld;
         }
 
         private void DeClutterScene()
@@ -301,17 +294,16 @@ namespace TYR_DeClutterer
                 if (_allGameObjectsList != null && _allGameObjectsList.Count > 0)
                 {
                     // Coroutine has finished, and allGameObjectsList is populated
-                    GameObject[] allGameObjectsArray = _allGameObjectsList.ToArray();
-                    foreach (GameObject obj in allGameObjectsArray)
+                    var allGameObjectsArray = _allGameObjectsList.ToArray();
+                    foreach (var obj in allGameObjectsArray)
                     {
-                        if (obj != null && ShouldDisableObject(obj))
+                        if (obj is not null && ShouldDisableObject(obj))
                         {
                             obj.SetActive(false);
-                            //Logger.LogInfo("Clutter Removed " + obj.name);
-                            //EFT.UI.ConsoleScreen.LogError("Clutter Removed " + obj.name);
                         }
                     }
                 }
+                
                 yield break;
             }
         }
@@ -322,14 +314,14 @@ namespace TYR_DeClutterer
 
             foreach (GameObject obj in gameObjects)
             {
-                bool isLODGroup = obj.GetComponent<LODGroup>() != null;
-                bool isStaticDeferredDecal = obj.GetComponent<StaticDeferredDecal>() != null;
-                bool isParticleSystem = obj.GetComponent<ParticleSystem>() != null;
-                bool isGoodThing = isLODGroup || isStaticDeferredDecal || isParticleSystem;
+                var isLODGroup = obj.GetComponent<LODGroup>() != null;
+                var isStaticDeferredDecal = obj.GetComponent<StaticDeferredDecal>() != null;
+                var isParticleSystem = obj.GetComponent<ParticleSystem>() != null;
+                var isGoodThing = isLODGroup || isStaticDeferredDecal || isParticleSystem;
 
-                if (Configuration.framesaverFireAndSmokeEnabledConfig.Value)
+                if (Configuration.FramesaverFireAndSmokeEnabledConfig.Value)
                 {
-                    if (Configuration.declutterDecalsEnabledConfig.Value)
+                    if (Configuration.DeclutterDecalsEnabledConfig.Value)
                     {
                         isGoodThing = isLODGroup || isStaticDeferredDecal || isParticleSystem;
                     }
@@ -340,7 +332,7 @@ namespace TYR_DeClutterer
                 }
                 else
                 {
-                    if (Configuration.declutterDecalsEnabledConfig.Value)
+                    if (Configuration.DeclutterDecalsEnabledConfig.Value)
                     {
                         isGoodThing = isLODGroup || isStaticDeferredDecal;
                     }
@@ -361,21 +353,21 @@ namespace TYR_DeClutterer
 
         private bool ShouldDisableObject(GameObject obj)
         {
-            if (obj == null)
+            if (obj is null)
             {
                 // Handle the case when obj is null for whatever reason.
                 return false;
             }
 
-            bool isStaticDeferredDecal = obj.GetComponent<StaticDeferredDecal>() != null;
-            bool isParticleSystem = obj.GetComponent<ParticleSystem>() != null;
-            bool isGoodThing = isStaticDeferredDecal || isParticleSystem;
+            var isStaticDeferredDecal = obj.GetComponent<StaticDeferredDecal>() is not null;
+            var isParticleSystem = obj.GetComponent<ParticleSystem>() is not null;
+            var isGoodThing = isStaticDeferredDecal || isParticleSystem;
             GameObject childGameMeshObject = null;
             GameObject childGameColliderObject = null;
-            bool childHasMesh = false;
-            float sizeOnY = 3f;
-            bool childHasCollider = false;
-            bool foundClutterName = foundClutterName = _clutterNameDictionary.Keys
+            var childHasMesh = false;
+            var sizeOnY = 3f;
+            var childHasCollider = false;
+            var foundClutterName = _clutterNameDictionary.Keys
                 .Any(key => obj.name.ToLower().Contains(key.ToLower()));
 
             bool dontDisableName = _dontDisableDictionary.Keys.
@@ -393,26 +385,31 @@ namespace TYR_DeClutterer
                         return false;
                     }
                 }
+                
                 foreach (Transform child in obj.transform)
                 {
                     childGameMeshObject = child.gameObject;
-                    if (child.GetComponent<MeshRenderer>() != null && !childGameMeshObject.name.ToLower().Contains("shadow") && !childGameMeshObject.name.ToLower().StartsWith("col") && !childGameMeshObject.name.ToLower().EndsWith("der"))
+                    
+                    if (child.GetComponent<MeshRenderer>() is not null && !childGameMeshObject.name.ToLower().Contains("shadow") && !childGameMeshObject.name.ToLower().StartsWith("col") && !childGameMeshObject.name.ToLower().EndsWith("der"))
                     {
                         childHasMesh = true;
+                        
                         // Exit the loop since we've found what we need
                         break;
                     }
                 }
+                
                 if (!childHasMesh && !isGoodThing)
                 {
                     return false;
                 }
+                
                 foreach (Transform child in obj.transform)
                 {
-                    if ((child.GetComponent<MeshCollider>() != null || child.GetComponent<BoxCollider>() != null) && child.GetComponent<BallisticCollider>() == null)
+                    if ((child.GetComponent<MeshCollider>() is not null || child.GetComponent<BoxCollider>() is not null) && child.GetComponent<BallisticCollider>() is null)
                     {
                         childGameColliderObject = child.gameObject;
-                        if (childGameColliderObject != null && childGameColliderObject.activeSelf)
+                        if (childGameColliderObject is not null && childGameColliderObject.activeSelf)
                         {
                             childHasCollider = true;
                             // Exit the loop since we've found what we need
@@ -420,6 +417,7 @@ namespace TYR_DeClutterer
                         }
                     }
                 }
+                
                 if (isGoodThing)
                 {
                     sizeOnY = 0.1f;
@@ -432,7 +430,7 @@ namespace TYR_DeClutterer
                 {
                     return false;
                 }
-                if ((childHasMesh || isGoodThing) && (!childHasCollider || isGoodThing) && sizeOnY <= 2f * Configuration.declutterScaleOffsetConfig.Value)
+                if ((childHasMesh || isGoodThing) && (!childHasCollider || isGoodThing) && sizeOnY <= 2f * Configuration.DeclutterScaleOffsetConfig.Value)
                 {
                     _savedClutterObjects.Add(obj);
                     return true;
@@ -443,7 +441,7 @@ namespace TYR_DeClutterer
 
         private bool IsBadThing(GameObject childGameMeshObject)
         {
-            bool isBadThing = childGameMeshObject.GetComponent<LootableContainer>() != null;
+            var isBadThing = childGameMeshObject.GetComponent<LootableContainer>() != null;
             isBadThing = childGameMeshObject.GetComponent<LootableContainersGroup>() != null;
             isBadThing = childGameMeshObject.GetComponent<ObservedLootItem>() != null;
             isBadThing = childGameMeshObject.GetComponent<LootItem>() != null;
@@ -471,12 +469,14 @@ namespace TYR_DeClutterer
 
         private float GetMeshSizeOnY(GameObject childGameObject)
         {
-            MeshRenderer meshRenderer = childGameObject?.GetComponent<MeshRenderer>();
-            if (meshRenderer != null && meshRenderer.enabled)
+            var meshRenderer = childGameObject?.GetComponent<MeshRenderer>();
+            
+            if (meshRenderer is not null && meshRenderer.enabled)
             {
-                Bounds bounds = meshRenderer.bounds;
+                var bounds = meshRenderer.bounds;
                 return bounds.size.y;
             }
+            
             return 0.0f;
         }
     }

@@ -5,27 +5,10 @@ using SPT.Reflection.Patching;
 using TYR_DeClutterer.Utils;
 
 namespace TYR_DeClutterer.Patches
-{
-    internal class CloudsControllerDelayUpdatesPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(CloudsController).GetMethod("LateUpdate", BindingFlags.Instance | BindingFlags.Public);
-        }
-
-        [PatchPrefix]
-        public static bool Prefix()
-        {
-            if (!Configuration.framesaverWeatherUpdatesEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
-                return true;
-
-            return false;
-        }
-    }
-
+{ 
     public class WeatherLateUpdatePatch : ModulePatch
     {
-        public static bool everyOtherLateUpdate = false;
+        private static bool _everyOtherLateUpdate;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -33,26 +16,26 @@ namespace TYR_DeClutterer.Patches
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(WeatherController __instance, Class1824 ___class1824_0, ToDController ___TimeOfDayController)
+        public static bool PatchPrefix(WeatherController __instance, ToDController ___TimeOfDayController)
         {
-            if (!Configuration.framesaverWeatherUpdatesEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
+            if (!Configuration.FramesaverWeatherUpdatesEnabledConfig.Value || !Configuration.FramesaverEnabledConfig.Value)
                 return true;
 
-            everyOtherLateUpdate = !everyOtherLateUpdate;
+            _everyOtherLateUpdate = !_everyOtherLateUpdate;
 
-            if (everyOtherLateUpdate)
+            if (_everyOtherLateUpdate)
             {
                 ___TimeOfDayController.Update();
-                ___class1824_0.Update();
                 __instance.method_4();
             }
+            
             return false;
         }
     }
 
     public class SkyDelayUpdatesPatch : ModulePatch
     {
-        public static bool everyOtherLateUpdate = false;
+        private static bool _everyOtherLateUpdate;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -62,12 +45,12 @@ namespace TYR_DeClutterer.Patches
         [PatchPrefix]
         public static bool PatchPrefix(TOD_Sky __instance)
         {
-            if (!Configuration.framesaverWeatherUpdatesEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
+            if (!Configuration.FramesaverWeatherUpdatesEnabledConfig.Value || !Configuration.FramesaverEnabledConfig.Value)
                 return true;
 
-            everyOtherLateUpdate = !everyOtherLateUpdate;
+            _everyOtherLateUpdate = !_everyOtherLateUpdate;
 
-            if (everyOtherLateUpdate)
+            if (_everyOtherLateUpdate)
             {
                 __instance.method_17();
                 __instance.method_18();
@@ -76,6 +59,7 @@ namespace TYR_DeClutterer.Patches
                 __instance.method_2();
                 __instance.method_3();
             }
+            
             return false;
         }
     }
@@ -90,7 +74,7 @@ namespace TYR_DeClutterer.Patches
         [PatchPrefix]
         public static bool Prefix()
         {
-            if (!Configuration.framesaverWeatherUpdatesEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
+            if (!Configuration.FramesaverWeatherUpdatesEnabledConfig.Value || !Configuration.FramesaverEnabledConfig.Value)
                 return true;
 
             return false;

@@ -7,12 +7,12 @@ namespace TYR_DeClutterer.Utils
     {
         public static void SetParticlesQuality()
         {
-            if (Configuration.framesaverParticlesEnabledConfig.Value)
+            if (Configuration.FramesaverParticlesEnabledConfig.Value)
             {
                 QualitySettings.softParticles = false;
-                if (Configuration.framesaverParticleBudgetDividerConfig.Value > 1)
+                if (Configuration.FramesaverParticleBudgetDividerConfig.Value > 1)
                 {
-                    QualitySettings.particleRaycastBudget = DeClutter.DefaultparticleRaycastBudget / Configuration.framesaverParticleBudgetDividerConfig.Value;
+                    QualitySettings.particleRaycastBudget = DeClutter.DefaultparticleRaycastBudget / Configuration.FramesaverParticleBudgetDividerConfig.Value;
                 }
             }
             else
@@ -24,7 +24,7 @@ namespace TYR_DeClutterer.Utils
 
         public static void SetSoftVegetationQuality()
         {
-            if (Configuration.framesaverSoftVegetationEnabledConfig.Value)
+            if (Configuration.FramesaverSoftVegetationEnabledConfig.Value)
             {
                 QualitySettings.softVegetation = false;
             }
@@ -36,7 +36,7 @@ namespace TYR_DeClutterer.Utils
 
         public static void SetReflectionQuality()
         {
-            if (Configuration.framesaverReflectionsEnabledConfig.Value)
+            if (Configuration.FramesaverReflectionsEnabledConfig.Value)
             {
                 QualitySettings.realtimeReflectionProbes = false;
             }
@@ -48,13 +48,13 @@ namespace TYR_DeClutterer.Utils
 
         public static void SetLightingShadowQuality()
         {
-            if (Configuration.framesaverLightingShadowCascadesEnabledConfig.Value)
+            if (Configuration.FramesaverLightingShadowCascadesEnabledConfig.Value)
             {
                 QualitySettings.shadows = ShadowQuality.HardOnly;
-                if (Configuration.framesaverShadowDividerConfig.Value > 1)
+                if (Configuration.FramesaverShadowDividerConfig.Value > 1)
                 {
-                    QualitySettings.pixelLightCount = 4 / Configuration.framesaverPixelLightDividerConfig.Value;
-                    QualitySettings.shadowCascades = 4 / Configuration.framesaverShadowDividerConfig.Value;
+                    QualitySettings.pixelLightCount = 4 / Configuration.FramesaverPixelLightDividerConfig.Value;
+                    QualitySettings.shadowCascades = 4 / Configuration.FramesaverShadowDividerConfig.Value;
                 }
             }
             else
@@ -67,7 +67,7 @@ namespace TYR_DeClutterer.Utils
 
         public static void SetTextureQuality()
         {
-            if (Configuration.framesaverTexturesEnabledConfig.Value)
+            if (Configuration.FramesaverTexturesEnabledConfig.Value)
             {
                 if (Singleton<SharedGameSettingsClass>.Instance.Graphics.Settings.TextureQuality.Value == 2)
                 {
@@ -75,7 +75,7 @@ namespace TYR_DeClutterer.Utils
                 }
                 else
                 {
-                    QualitySettings.masterTextureLimit = Configuration.framesaverTextureSizeConfig.Value;
+                    QualitySettings.masterTextureLimit = Configuration.FramesaverTextureSizeConfig.Value;
                 }
             }
             else
@@ -93,11 +93,11 @@ namespace TYR_DeClutterer.Utils
 
         public static void SetLodBiasQuality()
         {
-            if (Configuration.framesaverLODEnabledConfig.Value)
+            if (Configuration.FramesaverLODEnabledConfig.Value)
             {
-                if (Configuration.framesaverLODBiasConfig.Value > 1.0f)
+                if (Configuration.FramesaverLODBiasConfig.Value > 1.0f)
                 {
-                    QualitySettings.lodBias = 2.0f / Configuration.framesaverLODBiasConfig.Value;
+                    QualitySettings.lodBias = 2.0f / Configuration.FramesaverLODBiasConfig.Value;
                 }
             }
             else

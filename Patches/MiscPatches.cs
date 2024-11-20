@@ -2,6 +2,7 @@
 using EFT.Interactive;
 using HarmonyLib;
 using System.Reflection;
+using Comfort.Common;
 using SPT.Reflection.Patching;
 using TYR_DeClutterer.Utils;
 
@@ -9,7 +10,7 @@ namespace TYR_DeClutterer.Patches
 {
     public class PhysicsUpdatePatch : ModulePatch
     {
-        public static bool everyOtherFixedUpdate = false;
+        private static bool _everyOtherFixedUpdate;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -19,22 +20,24 @@ namespace TYR_DeClutterer.Patches
         [PatchPrefix]
         public static bool PatchPrefix()
         {
-            if (!Configuration.framesaverPhysicsEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
+            if (!Configuration.FramesaverPhysicsEnabledConfig.Value || !Configuration.FramesaverEnabledConfig.Value)
                 return true;
 
-            everyOtherFixedUpdate = !everyOtherFixedUpdate;
-            if (everyOtherFixedUpdate)
+            _everyOtherFixedUpdate = !_everyOtherFixedUpdate;
+            
+            if (_everyOtherFixedUpdate)
             {
-                EFTPhysicsClass.GClass650.Update();
-                EFTPhysicsClass.GClass651.Update();
+                EFTPhysicsClass.GClass711.Update();
+                EFTPhysicsClass.GClass712.Update();
             }
+            
             return false;
         }
     }
 
     public class PhysicsFixedUpdatePatch : ModulePatch
     {
-        public static bool everyOtherFixedUpdate = false;
+        private static bool _everyOtherFixedUpdate = false;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -44,21 +47,26 @@ namespace TYR_DeClutterer.Patches
         [PatchPrefix]
         public static bool PatchPrefix()
         {
-            if (!Configuration.framesaverPhysicsEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
+            if (!Configuration.FramesaverPhysicsEnabledConfig.Value || !Configuration.FramesaverEnabledConfig.Value)
                 return true;
 
-            everyOtherFixedUpdate = !everyOtherFixedUpdate;
-            if (everyOtherFixedUpdate)
+            if (!Singleton<GameWorld>.Instantiated) 
+                return true;
+            
+            _everyOtherFixedUpdate = !_everyOtherFixedUpdate;
+            
+            if (_everyOtherFixedUpdate)
             {
-                EFTPhysicsClass.GClass650.FixedUpdate();
+                EFTPhysicsClass.GClass711.FixedUpdate();
             }
+            
             return false;
         }
     }
 
     public class RagdollPhysicsLateUpdatePatch : ModulePatch
     {
-        public static bool everyOtherFixedUpdate = false;
+        private static bool _everyOtherFixedUpdate;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -68,14 +76,16 @@ namespace TYR_DeClutterer.Patches
         [PatchPrefix]
         public static bool PatchPrefix()
         {
-            if (!Configuration.framesaverPhysicsEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
+            if (!Configuration.FramesaverPhysicsEnabledConfig.Value || !Configuration.FramesaverEnabledConfig.Value)
                 return true;
 
-            everyOtherFixedUpdate = !everyOtherFixedUpdate;
-            if (everyOtherFixedUpdate)
+            _everyOtherFixedUpdate = !_everyOtherFixedUpdate;
+            
+            if (_everyOtherFixedUpdate)
             {
                 EFTPhysicsClass.SyncTransforms();
             }
+            
             return false;
         }
     }
@@ -90,7 +100,7 @@ namespace TYR_DeClutterer.Patches
         [PatchPrefix]
         public static bool PatchPrefix()
         {
-            if (!Configuration.framesaverFireAndSmokeEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
+            if (!Configuration.FramesaverFireAndSmokeEnabledConfig.Value || !Configuration.FramesaverEnabledConfig.Value)
                 return true;
 
             return false;

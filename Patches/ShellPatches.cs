@@ -16,7 +16,7 @@ namespace TYR_DeClutterer.Patches
         [PatchPrefix]
         public static bool Prefix()
         {
-            if (!Configuration.framesaverShellChangesEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
+            if (!Configuration.FramesaverShellChangesEnabledConfig.Value || !Configuration.FramesaverEnabledConfig.Value)
                 return true;
 
             return false;
@@ -35,7 +35,7 @@ namespace TYR_DeClutterer.Patches
         [PatchPrefix]
         public static bool Prefix()
         {
-            if (!Configuration.framesaverShellChangesEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
+            if (!Configuration.FramesaverShellChangesEnabledConfig.Value || !Configuration.FramesaverEnabledConfig.Value)
                 return true;
 
             return false;
@@ -52,7 +52,7 @@ namespace TYR_DeClutterer.Patches
         [PatchPrefix]
         public static bool Prefix(bool __result)
         {
-            if (!Configuration.framesaverShellChangesEnabledConfig.Value || !Configuration.framesaverEnabledConfig.Value)
+            if (!Configuration.FramesaverShellChangesEnabledConfig.Value || !Configuration.FramesaverEnabledConfig.Value)
                 return true;
 
             __result = false;
